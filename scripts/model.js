@@ -25,7 +25,7 @@ export class Model {
             localStorage.setItem(this.dbName, JSON.stringify(gettingData))
         }
 
-        gettingData.sort((a, b) => a.id > b.id ? 1 : -1)
+        if (gettingData) gettingData.sort((a, b) => a.id - b.id)
 
         try {
             response = {

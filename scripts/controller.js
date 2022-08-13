@@ -13,48 +13,74 @@ export class Controller {
     }
 
     handlers () {
+        const searchOptions = document.querySelector(`#search_options`)
+        let debounce = this.debounce(this.searchContactHandler, 400)
+
         this.formNameSelector.addEventListener(`submit`, this.submitHandler)
         document.addEventListener(`DOMContentLoaded`, this.loadHandler)
-        // this.formNameSelector.addEventListener(`click`, this.contactHandlers)
-        // document.querySelector(`.contact`).addEventListener(`click`, this.contactHandlers)
+        searchOptions.addEventListener(`input`, debounce)
+        searchOptions.addEventListener(`change`, this.searchSelectingHandler)
+        searchOptions.addEventListener(`click`, this.searchClearingHandler)
     }
 
     submitHandler = (event) => {
         event.stopPropagation()
         event.preventDefault()
 
-        let inputs = document.querySelectorAll(`input`)
-
+        let inputs = document.querySelector(`#contactForm`).querySelectorAll(`input`)
         let setData = null
 
         if (inputs instanceof NodeList) setData = Array.from(inputs)
 
-        setData.sort((a, b) => a.name - b.name ? 1 : -1)
-
-        for (let index of setData) {
-            if (index.value === '') return new Error(`Fill the data`)
-        }
-
         let savedData = setData.reduce((acc, item) => {
+            if(!item.value.trim()) throw new Error(`Fill inputs`)
             acc[item.name] = item.value
+            if (isNaN(acc.phone) && acc.phone) throw new Error(`Wrong phone number`)
             return acc
         }, {})
 
-
-
-        console.log(savedData)
-
         this.model.setData(savedData)
 
-        this.view.renderContact(savedData)
+
+        if (document.querySelector(`#no-contact`)){
+            this.view.removeContact(`#no-contacts`)
+        }
+
+        const data = this.model.data
+
+        if (data && document.querySelector(`#no-contacts`)) {
+            this.view.removeElement(`#no-contacts`)
+            this.view.renderContactContainer()
+        }
+        if (document.querySelector(`#contact-container`)){
+            console.log(`123`)
+            this.view.removeContacts()
+            this.view.renderContactContainer()
+        }
+
+        data.sort((a, b) => a.name > b.name ? 1 : -1)
+
+        console.log(data)
+
+        data.forEach(contact => {
+            this.view.renderContact(contact)
+        })
 
         this.view.clearForm()
+
+        if (this.model.data) {
+            const contactContainer = document.querySelector(`#contact-container`)
+            contactContainer.addEventListener(`click`, this.contactHandlers)
+        }
     }
 
     loadHandler = () => {
+
         const data = this.model.data
 
-        if (!data) return
+        if (!data) return this.view.renderNoContacts()
+
+        this.view.renderContactContainer()
 
         data.sort((a, b) => a.name > b.name ? 1 : -1)
 
@@ -62,46 +88,12 @@ export class Controller {
             this.view.renderContact(contact)
         })
 
+        if (this.model.data) {
+            const contactContainer = document.querySelector(`#contact-container`)
+            contactContainer.addEventListener(`click`, this.contactHandlers)
+        }
 
     }
-
-    // removeHandler = (event) => {
-    //     event.stopPropagation()
-    //     if (!event.target.classList.contains(`contact_remove`)) return
-    //
-    //     const id = +event.target.closest(`.contact`).getAttribute(`data-id`)
-    //
-    //     this.model.removeContact(id)
-    //     this.view.removeContact(event)
-    // }
-    //
-    // changeHandler = (event) => {
-    //     event.preventDefault()
-    //     event.stopPropagation()
-    //     if(!event.target.classList.contains(`contact_change`)) return
-    //
-    //     const id = +event.target.closest(`.contact`).getAttribute(`data-id`)
-    //
-    //     const data = this.model.data
-    //
-    //     let contact = data.filter(contact => contact.id === id)
-    //
-    //     this.view.changeContact(this.formName, contact)
-    //
-    //     const formChange = `formChange`
-    //
-    //     document.querySelector("." + formChange).addEventListener(`submit`, saveHandler)
-    //
-    //     saveHandler (event) {
-    //         const inputs = Array.from(document.querySelectorAll(`input`))
-    //     }
-    //
-    //     const inputs = Array.from(document.querySelectorAll(`input`))
-    //
-    //     console.log(inputs)
-    // }
-
-    //<----------------------------------------------------------------------->
 
     contactHandlers = (event) => {
         event.stopPropagation()
@@ -111,37 +103,41 @@ export class Controller {
             const id = +event.target.closest(`.contact`).getAttribute(`data-id`)
             this.model.removeContact(id)
             this.view.removeContact(event)
+            if (!this.model.data) {
+                document.querySelector(`#contact-container`).remove()
+                this.view.renderNoContacts()
+            }
         }
 
         if(event.target.classList.contains(`contact_change`)) {
             const id = +event.target.closest(`.contact`).getAttribute(`data-id`)
-
             this.idChange = id
-
             const data = this.model.data
-
             let contact = data.filter(contact => contact.id === id)[0]
+            const formChange = `formChange`
 
             this.view.hideForm()
 
             this.view.changeContact(this.formName, contact)
-
-            const formChange = `formChange`
 
             document.querySelector("#" + formChange).addEventListener(`submit`, this.changeHandler)
         }
 
         if(event.target.classList.contains(`contact_info`)) {
             const id = +event.target.closest(`.contact`).getAttribute(`data-id`)
-
             const data = this.model.data
-
             let contact = data.filter(contact => contact.id === id)[0]
 
-            // this.view.hideForm()
+            this.view.hideForm()
 
-            this.view.renderInfo(contact)
+            const renderInfo = this.view.renderInfo(contact)
+
+            renderInfo.addEventListener(`click`, this.closeHandler)
         }
+    }
+
+    closeHandler (e) {
+        if (e.target.classList.contains(`contact_close`)) window.location.reload()
     }
 
     changeHandler = (event) => {
@@ -162,6 +158,7 @@ export class Controller {
         }
 
         let savedData = setData.reduce((acc, item) => {
+            if (isNaN(acc.phone) && acc.phone) throw new Error(`Wrong phone number`)
             acc[item.name] = item.value
             return acc
         }, {})
@@ -177,31 +174,93 @@ export class Controller {
         window.location.reload()
     }
 
-    //<----------------------------------------------------------------------->
+    searchContactHandler = (e) => {
+        if (e.target.classList.contains(`search_input`)) {
+            const data = this.model.data
 
-    // changeHandler = (event) => {
-    //     event.preventDefault()
-    //     event.stopPropagation()
-    //     if(!event.target.classList.contains(`contact_change`)) return
-    //
-    //     const id = +event.target.closest(`.contact`).getAttribute(`data-id`)
-    //
-    //     const data = this.model.data
-    //
-    //     let contact = data.filter(contact => contact.id === id)
-    //
-    //     this.view.changeContact(this.formName, contact)
-    //
-    //     const formChange = `formChange`
-    //
-    //     document.querySelector("." + formChange).addEventListener(`submit`, saveHandler)
-    //
-    //     saveHandler (event) {
-    //         const inputs = Array.from(document.querySelectorAll(`input`))
-    //     }
-    //
-    //     const inputs = Array.from(document.querySelectorAll(`input`))
-    //
-    //     console.log(inputs)
-    // }
+            if (!data) return;
+
+            const value = e.target.value
+            let selectOption = document.querySelector(`#search_select`).value
+            const relevantContacts = data.filter(contact => {
+                return contact[`${selectOption}`].includes(value)
+            })
+
+            if (relevantContacts.length === 0) {
+                this.view.removeContacts()
+                this.view.renderNoContacts()
+                return;
+            }   else if (document.querySelector(`#no-contacts`)){
+                this.view.removeElement(`#no-contacts`)
+                this.view.renderContactContainer()
+            }
+
+            if (relevantContacts.length >= 1) {
+                this.view.removeContacts()
+                this.view.renderContactContainer()
+                relevantContacts.forEach(contact => {
+                    this.view.renderContact(contact)
+                })
+                const contactContainer = document.querySelector(`#contact-container`)
+                contactContainer.addEventListener(`click`, this.contactHandlers)
+
+            }
+        }
+    }
+
+    searchSelectingHandler = (e) => {
+        if (!e.target.classList.contains(`search_select`)) return
+        const input = document.querySelector(`#search_input`).value
+        this.selectOption = e.target.value
+        const data = this.model.data
+
+        const noContacts = document.querySelector(`#no-contacts`)
+        const contactContainer = document.querySelector(`#contact-container`)
+
+        if (input) {
+            document.querySelector(`#search_input`).value = ``
+            this.view.removeContacts()
+            this.view.renderContactContainer()
+            data.forEach(contact => this.view.renderContact(contact))
+        }
+        if (noContacts) {
+            console.log(`123`)
+            this.view.removeElement(`#no-contacts`)
+            this.view.renderContactContainer()
+            data.forEach(contact => this.view.renderContact(contact))
+        }
+
+    }
+
+    searchClearingHandler = (e) => {
+        if (e.target.classList.contains(`search_clean`)) {
+            let input = document.querySelector(`#search_input`).value
+
+            if (!input.trim()) return
+
+            const data = this.model.data
+
+            const noContacts = document.querySelector(`#no-contacts`)
+            const contactContainer = document.querySelector(`#contact-container`)
+
+            if (noContacts) {
+                this.view.removeElement(`#no-contacts`)
+            }   else if (contactContainer) {
+                this.view.removeContacts()
+            }
+
+            document.querySelector(`#search_input`).value = ``
+            this.view.renderContactContainer()
+            data.forEach(contact => this.view.renderContact(contact))
+        }
+    }
+
+    debounce = (func, ms) => {
+        let timeOut;
+        return function () {
+            const fnCall = () => func.apply(this, arguments);
+            clearTimeout(timeOut);
+            timeOut = setTimeout(fnCall, ms)
+        }
+    }
 }
