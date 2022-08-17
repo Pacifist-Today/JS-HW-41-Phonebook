@@ -53,7 +53,6 @@ export class Controller {
             this.view.renderContactContainer()
         }
         if (document.querySelector(`#contact-container`)){
-            console.log(`123`)
             this.view.removeContacts()
             this.view.renderContactContainer()
         }
@@ -72,6 +71,9 @@ export class Controller {
             const contactContainer = document.querySelector(`#contact-container`)
             contactContainer.addEventListener(`click`, this.contactHandlers)
         }
+
+        let inputCleaner = document.querySelector(`#search_input`).value
+        if (inputCleaner.length) document.querySelector(`#search_input`).value = ``
     }
 
     loadHandler = () => {
