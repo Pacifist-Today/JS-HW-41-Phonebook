@@ -1,0 +1,121 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Comic Sans MS";
+}
+
+#form-wrapper {
+    width:400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#contactForm {
+    width: 400px;
+    margin-top: 10px;
+    padding: 10px 45px;
+    border: 5px solid RGB(224,207,177);
+    border-radius: 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: RGB(224,207,177);
+}
+
+.position_block input {
+    width: 225px;
+}
+
+#search_options {
+    width:400px;
+    background: RGB(224,207,177);
+    padding: 10px;
+    display: flex;
+    border: 5px solid RGB(224,207,177);
+    border-radius: 10px;
+}
+
+#search_input {
+    width: 200px;
+    margin-right: 10px;
+}
+
+#search_select {
+    margin-right: 10px;
+}
+
+.contact-container {
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 5px solid RGB(224,207,177);
+    border-radius: 10px;
+    background: RGB(245,225,205);
+}
+
+.contact-container .container_par{
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 14px;
+}
+
+.contact {
+    margin-bottom: 10px;
+    background: RGB(245, 229, 180);
+    border: 5px solid RGB(235, 224, 175);
+    border-radius: 10px;
+    padding: 5px 5px;
+}
+
+.contact_name {
+    padding-left: 10px;
+}
+
+.contact_number {
+    padding-left: 10px;
+}
+
+.contact_position {
+    padding-left: 10px;
+}
+
+.no-contacts {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 14px;
+
+}
+
+.contact_info_page {
+    margin-bottom: 10px;
+    background: RGB(245, 229, 180);
+    border: 5px solid RGB(235, 224, 175);
+    border-radius: 10px;
+    padding: 5px 5px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.formChange {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    background: RGB(245, 229, 180);
+    border: 5px solid RGB(235, 224, 175);
+    border-radius: 10px;
+    padding: 20px 20px;
+}
+
+.change_position_block {
+    margin-bottom: 20px;
+}
